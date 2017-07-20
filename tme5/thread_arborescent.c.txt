@@ -1,0 +1,53 @@
+void* thread_func(void* arg) {
+	
+  int i, nb;
+  int *param;
+  int *lvl = (int*)arg;
+  pthread_t *tid;
+	
+  nb = (*lvl)+1;
+	
+  if (*lvl < max) {
+    param = (int*)malloc(sizeof(int));
+    *param = nb;
+    tid = calloc(nb, sizeof(pthread_t));
+    printf("%d cree %d fils\n", (int)pthread_self(), nb);
+    for (i = 0; i < nb; i++) {
+      pthread_create((tid+i), 0, thread_func, param);
+    }
+    for (i = 0; i < nb; i++)
+      pthread_join(tid[i], NULL);
+  }
+
+  if (*lvl > 1)
+    pthread_exit ( (void*)0);
+	
+  return (void*)0;
+}
+
+int main(int argc, char**argv)
+{
+	int i;
+	char status;
+	int k;
+
+    numbrethread = argv[1];
+
+    numbre = argc ;
+
+	for(i=0;i< argv[1];i++){	
+		if(pthread_create(&(tid[i]),NULL,test,argv)!=0){
+			perror("pthread_creat \n");
+			exit(1);	
+		}	
+	}
+	for(i=0;i< argv[1];i++){
+		if(pthread_join(tid[i],(void*)&status)!=0){
+		perror("pthread_join \n");
+		exit(1);	
+		}else{
+			printf("nom de fichier pas traite %s \n",status);		
+		}
+	}
+    return 0;
+}

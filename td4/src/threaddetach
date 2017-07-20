@@ -1,0 +1,61 @@
+#define _POSIX_SOURCE 1
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define N 10
+
+pthread_mutex_t mutex_fin = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond_fin = PTHREAD_COND_INITIALIZER;
+
+pthread_t  tid[N];
+int variable = 0;
+
+void *test(void *arg)
+{
+	int i;
+	pthread_mutex_lock(&mutex_fin);
+	variable += (int) (10*((double)rand())/ RAND_MAX);
+	printf("argument recu %d, tid: %d\n",(int*)arg,(int)pthread_self());
+	pthread_mutex_unlock(&mutex);
+	pthread_exit(2*arg);
+return NULL;
+}
+
+int main(int argc, char**argv)
+{
+	int i,status;
+	int* pt_ind;
+	pthread_mutex_lock(&mutex_fin);
+	for(i=0;i<N;i++){
+		pt_ind = (int*)malloc(sizeof(i));
+		pt_ind = i;	
+	}
+	
+	for(i=0;i<N;i++){
+		if(pthread_create(&(tid[i]),NULL,test,i)!=0){
+		perror("pthread_creat \n");
+		exit(1);	
+		}else{
+			if(pthread_detach(&(tid[i]))!=0){
+				perror("pthread_detach \n");
+				exit(1);					
+			}		
+		}
+	}
+	for(i=0;i<N;i++){
+		if(pthread_join(tid[i],(void**)&status)!=0){
+		perror("pthread_join \n");
+		exit(1);	
+		}else{
+			printf("thread %dfini avec status:%d\n",i,status);		
+		}
+	}
+	pthread_cond_wait(&cond_fin,&mutex_fin);
+	pthread_mutex_unlock(&mutex);
+	
+	printf("variable globale:%d\n",variable);
+
+    return 0;
+}
